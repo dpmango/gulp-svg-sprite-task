@@ -7,7 +7,7 @@
     "node": ">=14"
   },
   "scripts": {
-    "start": "gulp watch",
+    "start": "gulp",
     "build": "gulp build"
   },
   "author": "Sergey Khmelevskoy <sergey@khmelevskoy.co>",
