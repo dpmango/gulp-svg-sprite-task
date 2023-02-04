@@ -1,18 +1,10 @@
-var gulp   = require('gulp');
-var del    = require('del');
-var util   = require('gulp-util');
-var cache  = require('gulp-cache');
-var config = require('../config');
+const del = require('del');
+const {default: config} = require('../config.js');
 
-// Clean dist folder to prevent conflicts
-// keep images present as it might be time consuming
-gulp.task('clean:dist', function() {
-  return del.sync([
+const build = () => {
+  return del([
     config.dest.root + '/**/*'
   ]);
-})
+};
 
-// Clear gulp cache
-gulp.task('cache:clear', function (callback) {
-  return cache.clearAll(callback)
-})
+exports.default = { build }

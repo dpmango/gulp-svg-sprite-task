@@ -1,129 +1,166 @@
-var gulp        = require('gulp');
-var plumber     = require('gulp-plumber');
-var svgmin      = require('gulp-svgmin');
-var svgStore    = require('gulp-svgstore');
-var rename      = require('gulp-rename');
-var cheerio     = require('cheerio');
-var gCheerio    = require('gulp-cheerio');
-var through2    = require('through2');
-var consolidate = require('gulp-consolidate');
-var config      = require('../../config');
+const gulp = require('gulp');
+const plumber = require('gulp-plumber');
+const svgmin = require('gulp-svgmin');
+const svgStore = require('gulp-svgstore')
+const rename = require('gulp-rename');
+const cheerio = require('cheerio');
+const gCheerio = require('gulp-cheerio');
+const through2 = require('through2');
+const consolidate = require('gulp-consolidate');
+const {default: config} = require('../../config.js');
 
 // monocolor icons controlled with color/fill in css
-gulp.task('sprite:svg:mono', function() {
-  return gulp
+const spriteSvgMono = () =>
+  gulp
     .src(config.src.iconsSvgMono + '/**/*.svg')
-    .pipe(plumber({
-        errorHandler: config.errorHandler
-    }))
-    .pipe(svgmin({
+    .pipe(
+      plumber({
+        errorHandler: config.errorHandler,
+      })
+    )
+    .pipe(
+      svgmin({
         js2svg: {
-          pretty: true
+          pretty: true,
         },
-        plugins: [{
-          removeDesc: true
-        }, {
-          cleanupIDs: true
-        }, {
-          mergePaths: false
-        }]
-    }))
-    .pipe(rename({ prefix: 'ico-mono-' }))
+        plugins: [
+          {
+            removeDesc: true,
+          },
+          {
+            cleanupIDs: true,
+          },
+          {
+            removeViewBox: false,
+          },
+          {
+            mergePaths: false,
+          },
+        ],
+      })
+    )
+    .pipe(rename({ prefix: 'svg-icon-' }))
     .pipe(svgStore({ inlineSvg: false }))
-    .pipe(through2.obj(function(file, encoding, cb) {
-        var $ = cheerio.load(file.contents.toString(), {xmlMode: true});
-        var data = $('svg > symbol').map(function() {
-            var $this  = $(this);
+    .pipe(
+      through2.obj(function (file, encoding, cb) {
+        var $ = cheerio.load(file.contents.toString(), { xmlMode: true });
+        var data = $('svg > symbol')
+          .map(function () {
+            var $this = $(this);
             var size = $this.attr('viewBox').split(' ').splice(2);
-            var name   = $this.attr('id');
-            var ratio  = size[0] / size[1]; // symbol width / symbol height
-            var fill   = $this.find('[fill]:not([fill="currentColor"])').attr('fill');
+            var name = $this.attr('id');
+            var ratio = size[0] / size[1]; // symbol width / symbol height
+            var fill = $this.find('[fill]:not([fill="currentColor"])').attr('fill');
             var stroke = $this.find('[stroke]').attr('stroke');
             return {
               name: name,
               ratio: +ratio.toFixed(2),
               fill: fill || 'initial',
-              stroke: stroke || 'initial'
+              stroke: stroke || 'initial',
             };
-        }).get();
+          })
+          .get();
         this.push(file);
-        gulp.src(__dirname + '/_sprite-svg-mono.scss')
-            .pipe(consolidate('lodash', {
-                symbols: data
-            }))
-            .pipe(gulp.dest(config.src.sassGen));
+        gulp
+          .src(__dirname + '/_sprite-svg-mono.scss')
+          .pipe(
+            consolidate('lodash', {
+              symbols: data,
+            })
+          )
+          .pipe(gulp.dest(config.src.sassGen));
         cb();
-    }))
-    .pipe(gCheerio({
-        run: function($, file) {
+      })
+    )
+    .pipe(
+      gCheerio({
+        run: function ($, file) {
           $('[fill]:not([fill="currentColor"])').removeAttr('fill');
           $('[stroke]').removeAttr('stroke');
           $('[style]').removeAttr('style');
           $('[opacity]').removeAttr('opacity');
           $('[fill-opacity]').removeAttr('fill-opacity');
         },
-        parserOptions: { xmlMode: true }
-    }))
-    .pipe(rename({ basename: 'sprite-mono' }))
+        parserOptions: { xmlMode: true },
+      })
+    )
+    .pipe(rename({ basename: 'svg-sprite' }))
     .pipe(gulp.dest(config.dest.img));
-});
-
 
 // preserve colors on icons
-gulp.task('sprite:svg:color', function() {
-  return gulp
+const spriteSvgColor = () =>
+  gulp
     .src(config.src.iconsSvgColor + '/**/*.svg')
-    .pipe(plumber({
-      errorHandler: config.errorHandler
-    }))
-    .pipe(svgmin({
+    .pipe(
+      plumber({
+        errorHandler: config.errorHandler,
+      })
+    )
+    .pipe(
+      svgmin({
         js2svg: {
-            pretty: true
+          pretty: true,
         },
-        plugins: [{
-          removeDesc: true
-        }, {
-          cleanupIDs: true
-        }, {
-          mergePaths: false
-        }, {
-          removeDimensions: false
-        }, {
-          removeAttrs: false
-        }]
-    }))
-    .pipe(rename({ prefix: 'ico-color-' }))
+        plugins: [
+          {
+            removeDesc: true,
+          },
+          {
+            cleanupIDs: true,
+          },
+          {
+            removeViewBox: false,
+          },
+          {
+            mergePaths: false,
+          },
+          {
+            removeDimensions: false,
+          },
+          {
+            removeAttrs: false,
+          },
+        ],
+      })
+    )
+    .pipe(rename({ prefix: 'svg-icon-color-' }))
     .pipe(svgStore({ inlineSvg: false }))
-    .pipe(through2.obj(function(file, encoding, cb) {
-        var $ = cheerio.load(file.contents.toString(), {xmlMode: true});
-        var data = $('svg > symbol').map(function() {
-            var $this  = $(this);
+    .pipe(
+      through2.obj(function (file, encoding, cb) {
+        var $ = cheerio.load(file.contents.toString(), { xmlMode: true });
+        var data = $('svg > symbol')
+          .map(function () {
+            var $this = $(this);
             var size = $this.attr('viewBox').split(' ').splice(2);
-            var name   = $this.attr('id');
-            var ratio  = size[0] / size[1]; // symbol width / symbol height
+            var name = $this.attr('id');
+            var ratio = size[0] / size[1]; // symbol width / symbol height
             return {
-                name: name,
-                ratio: +ratio.toFixed(2)
+              name: name,
+              ratio: +ratio.toFixed(2),
             };
-        }).get();
+          })
+          .get();
         this.push(file);
-        gulp.src(__dirname + '/_sprite-svg-color.scss')
-            .pipe(consolidate('lodash', {
-                symbols: data
-            }))
-            .pipe(gulp.dest(config.src.sassGen));
+        gulp
+          .src(__dirname + '/_sprite-svg-color.scss')
+          .pipe(
+            consolidate('lodash', {
+              symbols: data,
+            })
+          )
+          .pipe(gulp.dest(config.src.sassGen));
         cb();
-    }))
-    .pipe(rename({ basename: 'sprite-color' }))
+      })
+    )
+    .pipe(rename({ basename: 'svg-sprite-color' }))
     .pipe(gulp.dest(config.dest.img));
-});
 
-gulp.task('sprite:svg', [
-  'sprite:svg:mono',
-  'sprite:svg:color',
-]);
+const build = gulp.parallel(spriteSvgMono, spriteSvgColor);
 
-gulp.task('sprite:svg:watch', function() {
-  gulp.watch(config.src.iconsSvgMono + '/**/*.svg', ['sprite:svg:mono']);
-  gulp.watch(config.src.iconsSvgColor + '/**/*.svg', ['sprite:svg:color']);
-});
+const watch = (cb) => {
+  gulp.watch(config.src.iconsSvgMono + '/**/*.svg', spriteSvgMono);
+  gulp.watch(config.src.iconsSvgColor + '/**/*.svg', spriteSvgColor);
+  cb()
+};
+
+exports.default = { build, watch }

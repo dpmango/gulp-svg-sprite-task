@@ -1,24 +1,32 @@
-var gulp         = require('gulp');
-var sass         = require('gulp-sass');
-var plumber      = require('gulp-plumber');
-var config       = require('../config');
+const gulp = require('gulp');
+const sass = require('gulp-sass')(require('sass'));
+const plumber = require('gulp-plumber');
+const {default: config} = require('../config.js');
 
 // Sass task
-gulp.task('sass', function() {
-  return gulp
+const build = () =>
+  gulp
     .src(config.src.sass + '/*.{sass,scss}')
-    .pipe(plumber({
-      errorHandler: config.errorHandler
-    }))
-    .pipe(sass({
-        outputStyle: config.production ? 'compact' : 'expanded', // nested, expanded, compact, compressed
+    .pipe(
+      plumber({
+        errorHandler: config.errorHandler,
+      })
+    )
+    .pipe(
+      sass({
+        outputStyle: process.env.NODE_ENV === 'production' ? 'compact' : 'expanded', // nested, expanded, compact, compressed
         precision: 5,
-        includePaths : [config.src.sass]
-    }))
-    .on('error', config.errorHandler)
-    .pipe(gulp.dest(config.dest.css))
-});
+        includePaths: ['node_modules', config.src.sass],
+      })
+    )
+    // .on('error', config.errorHandler)
+    .pipe(gulp.dest(config.dest.css));
 
-gulp.task('sass:watch', function() {
-  gulp.watch(config.src.sass + '/**/*.{sass,scss}', ['sass']);
-});
+const watch = () => {
+  gulp.watch(
+    [config.src.sass + '/**/*.{sass,scss}'],
+    build
+  );
+}
+
+exports.default = { build, watch }

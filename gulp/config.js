@@ -1,42 +1,25 @@
-var util = require('gulp-util');
+const colors = require('ansi-colors');
+const errorHandler = require('./util/errors.js');
 
-var production = util.env.production || util.env.prod || false;
-var destPath = 'dist';
+const destPath = 'dist';
 
-var config = {
-  env       : 'development',
-  production: production,
-
+const config = {
   src: {
-    root         : 'src',
-    sass         : 'src/sass',
-    sassGen      : 'src/sass/generated',
-    iconsSvgMono : 'src/icons/svg-mono',
+    root: 'src',
+    sass: 'src/sass',
+    sassGen: 'src/sass/generated',
+    icons: 'src/icons',
+    iconsSvgMono: 'src/icons/svg-mono',
     iconsSvgColor: 'src/icons/svg-colors',
+
   },
   dest: {
-    root  : destPath,
-    css   : destPath + '/css',
-    img   : destPath + '/img',
+    root: destPath,
+    css: destPath + '/css',
+    img: destPath + '/img',
   },
 
-  setEnv: function(env) {
-    if (typeof env !== 'string') return;
-    this.env = env;
-    this.production = env === 'production';
-    process.env.NODE_ENV = env;
-  },
-
-  logEnv: function() {
-    util.log(
-      'Environment:',
-      util.colors.white.bgRed(' ' + process.env.NODE_ENV + ' ')
-    );
-  },
-
-  errorHandler: require('./util/errors')
+  errorHandler: errorHandler,
 };
 
-config.setEnv(production ? 'production' : 'development');
-
-module.exports = config;
+exports.default = config;
